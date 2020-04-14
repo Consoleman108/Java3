@@ -60,12 +60,25 @@ public class ClientChat extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
+                controller.getLog().writeMessageToLog(controller.getLogin(), message);
                 chatText.append(message);
                 chatText.append(System.lineSeparator());
             }
         });
     }
 
+    public void addHistoryToChatText(List<String> list){
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                while (!list.isEmpty()){
+                    chatText.append(list.get(0));
+                    chatText.append(System.lineSeparator());
+                    list.remove(0);
+                }
+            }
+        });
+    }
 
     private void appendOwnMessage(String message) {
         appendMessage("Я: " + message);
