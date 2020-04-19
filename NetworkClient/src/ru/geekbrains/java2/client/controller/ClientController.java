@@ -17,6 +17,8 @@ public class ClientController {
     private final AuthDialog authDialog;
     private final ClientChat clientChat;
     private String nickname;
+    private String login;
+    private Log log = new Log();
 
     public ClientController(String serverHost, int serverPort) {
         this.networkService = new NetworkService(serverHost, serverPort);
@@ -50,7 +52,9 @@ public class ClientController {
                 clientChat.appendMessage(message);
             }
         });
+        List<String> list = log.readMessageFromLog(login);
         clientChat.setVisible(true);
+        clientChat.addHistoryToChatText(list);
     }
 
     private void setUserName(String nickname) {
@@ -67,6 +71,7 @@ public class ClientController {
     }
 
     public void sendAuthMessage(String login, String pass) throws IOException {
+        this.login = login;
         networkService.sendCommand(authCommand(login, pass));
     }
 
@@ -109,5 +114,13 @@ public class ClientController {
         users.remove(nickname);
         users.add(0, "All");
         //clientChat.updateUsers(users);
+    }
+
+    public Log getLog() {
+        return log;
+    }
+
+    public String getLogin() {
+        return login;
     }
 }
