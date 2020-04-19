@@ -9,6 +9,8 @@ import ru.geekbrains.java2.server.NetworkServer;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 // Сущность которая обеспечивает логику работы обработки клиентского соединения
 // на каждое клиетское подключени будет создаваться новый обработчик.
@@ -16,6 +18,7 @@ public class ClientHandler {
 
     private final NetworkServer networkServer;
     private final Socket clientSocket;
+    private final int TIMEOUT_AUTHENTICATION = 120_000;
 
     private ObjectInputStream in;
     private ObjectOutputStream out;
@@ -33,10 +36,11 @@ public class ClientHandler {
 
     private void doHandle(Socket socket) {
         try {
+            ExecutorService executorService = Executors.newFixedThreadPool(2);
             out = new ObjectOutputStream(socket.getOutputStream());
             in = new ObjectInputStream(socket.getInputStream());
 
-            new Thread(() -> {
+            executorService.execute(() -> {
                 try {
                     authentication();
                     readMessages();
@@ -45,8 +49,24 @@ public class ClientHandler {
                 } finally {
                     closeConnection();
                 }
-            }).start();
+            });
 
+            // Поток для отсчита время для отключения пользователей которые не прошли аутентификацию.
+            executorService.execute(() -> {
+                    try {
+                        Thread.currentThread().sleep(TIMEOUT_AUTHENTICATION);
+                        if(nickname == null){
+                            Command authErrorCommand = Command.authErrorCommand("Время ожидания превышено");
+                            sendMessage(authErrorCommand);
+                            closeConnection();
+                            System.out.println("Соединение разорвано");
+                        }
+                    } catch (InterruptedException | IOException e) {
+                        e.printStackTrace();
+                    }
+            });
+
+            executorService.shutdown();
         } catch (IOException e) {
             e.printStackTrace();
         }
