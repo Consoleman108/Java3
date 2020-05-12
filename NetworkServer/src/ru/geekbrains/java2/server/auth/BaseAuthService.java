@@ -1,8 +1,13 @@
 package ru.geekbrains.java2.server.auth;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import ru.geekbrains.java2.server.NetworkServer;
+
 import java.sql.*;
 
 public class BaseAuthService implements AuthService {
 
+    private static final Logger logger = LogManager.getLogger(BaseAuthService.class);
     private static Connection connection;
     private static Statement stmt;
 
@@ -24,7 +29,8 @@ public class BaseAuthService implements AuthService {
 
     @Override
     public void start() {
-        System.out.println("Сервис аутентификации запущен");
+//        System.out.println("Сервис аутентификации запущен");
+        logger.info("Сервис аутентификации запущен");
         try {
             Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection("jdbc:sqlite:mydb.db");
@@ -36,7 +42,8 @@ public class BaseAuthService implements AuthService {
 
     @Override
     public void stop() {
-        System.out.println("Сервис аутентификации оставлен");
+//        System.out.println("Сервис аутентификации оставлен");
+        logger.info("Сервис аутентификации оставлен");
         try {
             connection.close();
         } catch (SQLException e) {

@@ -9,14 +9,14 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class NetworkServer {
 
+    private static final Logger logger = LogManager.getLogger(NetworkServer.class);
     private final int port;
     private final List<ClientHandler> clients = new ArrayList<>();
     private final AuthService authService;
@@ -28,16 +28,20 @@ public class NetworkServer {
 
     public void start() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("Сервер был успешно запущен на порту " + port);
+//            System.out.println("Сервер был успешно запущен на порту " + port);
+            logger.info("Сервер был успешно запущен на порту");
             authService.start();
             while (true) {
-                System.out.println("Ожидание клиентского подключения...");
+//                System.out.println("Ожидание клиентского подключения...");
+                logger.info("Ожидание клиентского подключения...");
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("Клиент подлючился");
+//                System.out.println("Клиент подлючился");
+                logger.info("Клиент подлючился");
                 createClientHandler(clientSocket);
             }
         } catch (IOException e) {
-            System.out.println("Ошибка при работе сервера");
+//            System.out.println("Ошибка при работе сервера");
+            logger.error("Ошибка при работе сервера");
             e.printStackTrace();
         } finally {
             authService.stop();
